@@ -54,7 +54,9 @@ def get_players():
 
             # Append previously created player object to list
             players.append(player)
-            
+
+            line = reader.readline()
+
     btnGenerate.config(state="normal")
 
 root = Tk()
