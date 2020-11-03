@@ -40,16 +40,22 @@ def get_players():
     filename = filedialog.askopenfilename(initialdir=os.getcwd())
 
     # Begin reading the text file
-    for line in filename:
+    with open(filename, "r") as reader:
 
-        # Split the line into a list of split strings
-        splitData = line.split(",")
+        line = reader.readline()
 
-        # Create player object using the string above split by commas
-        player = Player(splitData[0], splitData[1], splitData[2], splitData[3])
+        while line != "":
 
-        # Append previously created player object to list
-        players.append(player)
+            # Split the line into a list of split strings
+            splitData = line.split(",")
+
+            # Create player object using the string above split by commas
+            player = Player(splitData[0], splitData[1], splitData[2], splitData[3].strip("\n"))
+
+            # Append previously created player object to list
+            players.append(player)
+            
+    btnGenerate.config(state="normal")
 
 root = Tk()
 root.title('Fortnite Team Tournament')
