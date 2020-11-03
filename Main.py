@@ -1,19 +1,26 @@
-from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog
-import os
+from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog, END
+import os, operator
 from Player import Player
 
 # Initialize the list intended for storing Player objects
 players = []
 
+
+# Close player list top view window
 def close_topview():
+    # View main window
     root.update()
     root.deiconify()
     
+    # Delete top-level window
     top_level.withdraw()
     
+# Open player list top view window   
 def view_players():
+    # Delete main window
     root.withdraw()
     
+    # View top-level window
     top_level.update()
     top_level.deiconify()
 
@@ -50,7 +57,7 @@ def get_players():
             splitData = line.split(",")
 
             # Create player object using the string above split by commas
-            player = Player(splitData[0], splitData[1], splitData[2], splitData[3].strip("\n"))
+            player = Player(splitData[0], splitData[1], int(splitData[2]), splitData[3].strip("\n"))
 
             # Append previously created player object to list
             players.append(player)
@@ -58,7 +65,40 @@ def get_players():
             line = reader.readline()
 
     btnGenerate.config(state="normal")
+    output_players()
+    
+# Output players to tree view top-level widget
+def output_players():
+    global players
+    # Clear items 
+    for i in tview.get_children():
+        tview.delete(i)
 
+    # Insert player objects to tree view
+    for player in range(len(players)):
+        tview.insert("", END, values=(players[player].getLastName(), players[player].getFirstName(), players[player].getTierScore(),
+            players[player].getTier()))
+ 
+# Sort players by headings 
+def sort_players(headingNum):
+    global players
+    # Sort ascending last names
+    if headingNum == 1:
+        players.sort(key=operator.attrgetter("lastName"))
+    # Sort ascending first names
+    elif headingNum ==2:
+        players.sort(key=operator.attrgetter("firstName"))
+    # Sort descending rating, then ascending last name
+    elif headingNum ==3:
+        players = sorted(sorted(players,
+                    key=operator.attrgetter('lastName')),
+                    key=operator.attrgetter('tierScore'), reverse=True)
+    # Sort ascending tier names
+    elif headingNum ==4:
+        players.sort(key=operator.attrgetter("tier"))
+    # Output sorted lists to tree view
+    output_players()
+    
 root = Tk()
 root.title('Fortnite Team Tournament')
 root.geometry('%dx%d+%d+%d' % (912, 740, root.winfo_screenwidth() // 2 - 912 // 2,
@@ -128,9 +168,10 @@ tview.grid(row=1, column=0, pady=5)
 headingtext = ('LAST NAME', 'FIRST NAME', 'RATING', 'TIER')
 columnwidths = [150, 150, 75, 75]
 
+# Tree view headings and columns
 for i in range(4):
     tview.column(str(i+1), width=columnwidths[i], anchor='w')
-    tview.heading(str(i+1), text=headingtext[i], anchor='w')
+    tview.heading(str(i+1), text=headingtext[i], anchor='w', command=lambda columnid=i+1: sort_players(columnid))
 
 vscroll = Scrollbar(top_level, orient='vertical', command=tview.yview)
 vscroll.grid(row=1, column=1, sticky='ns')
